@@ -16,8 +16,8 @@ function App() {
       <div className="flex h-full">
         <CssBaseline />
         <Navbar />
-        <main className="grow p-8">
-        <div className="mt-[70px]">
+        <main className="grow mt-[70px]">
+        <div className="p-8">
         <Routes>
           <Route exact path="/" element={<Movies />} />
           <Route exact path="/movie/:id" element={<MovieInformation />} />

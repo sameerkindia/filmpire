@@ -70,3 +70,8 @@ button:focus-visible {
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme {
+  --breakpoint-md: 800px;
+}
