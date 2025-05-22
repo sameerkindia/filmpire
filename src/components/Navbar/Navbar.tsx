@@ -15,24 +15,73 @@ import {
   IconButton,
   Toolbar,
 } from "@mui/material";
-import React, { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ThemeContext } from "../../context/themeContext";
 import Sidebar from "../Sidebar/Sidebar";
+import SearchBar from "../../Search/Search";
+import { createSessionId, fetchToken, moviesApi } from "../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, userSelector } from "../../features/auth";
 
 const Navbar = () => {
+  const { isAuthenticated, user } = useSelector(userSelector);
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const [mobileOpen , setMobileOpen] = useState(false);
-  const isAuthenticated = true;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const dispatch = useDispatch();
 
+  const token = localStorage.getItem("request_token");
+  const sessionIdFromLocalStorage = localStorage.getItem("session_id");
+
+  // useEffect(() => {
+  //   const loginUser = async () => {
+  //     if (token) {
+  //       if (sessionIdFromLocalStorage) {
+  //         if (sessionIdFromLocalStorage) {
+  //           const { data: userData } = await moviesApi.get(
+  //             `/account?session_id=${sessionIdFromLocalStorage}`
+  //           );
+  //           dispatch(setUser(userData));
+  //         } else {
+  //           const sessionId = await createSessionId();
+  //           const { data: userData } = await moviesApi.get(
+  //             `/account?session_id=${sessionId}`
+  //           );
+  //           dispatch(setUser(userData));
+  //         }
+  //       }
+  //     }
+  //   };
+
+  //   loginUser();
+  // }, [token]);
+
+  useEffect(() => {
+      const logInUser = async () => {
+        if (token) {
+          if (sessionIdFromLocalStorage) {
+            const { data: userData } = await moviesApi.get(`/account?session_id=${sessionIdFromLocalStorage}`);
+            dispatch(setUser(userData));
+          } else {
+            const sessionId = await createSessionId();
+            const { data: userData } = await moviesApi.get(`/account?session_id=${sessionId}`);
+            dispatch(setUser(userData));
+          }
+        }
+      };
+  
+      logInUser();
+    }, [token]);
+
+  console.log(user, "this is user");
   return (
     <>
       <AppBar position="fixed">
-        <Toolbar className="h-20 flex justify-between sm:ml-60">
+        <Toolbar className="h-20 flex max-sm:flex-wrap justify-between sm:ml-60">
           <IconButton
             color="inherit"
             edge="start"
             className="outline-none max-sm:mr-0 sm:!hidden"
-            onClick={()=> setMobileOpen((isOpen)=> !isOpen)}
+            onClick={() => setMobileOpen((isOpen) => !isOpen)}
           >
             <Menu />
           </IconButton>
@@ -41,16 +90,16 @@ const Navbar = () => {
             {theme === "dark" ? <Brightness7 /> : <Brightness4 />}
           </IconButton>
 
-          <p className="max-sm:hidden">...Search</p>
+          <SearchBar customClass="max-sm:hidden" />
           <div>
             {!isAuthenticated ? (
-              <Button color="inherit" onClick={() => {}}>
+              <Button color="inherit" onClick={fetchToken}>
                 Login &nbsp; <AccountCircle />
               </Button>
             ) : (
               <Button
                 color="inherit"
-                href={`/profile/123`}
+                href={`/profile/${user?.id}`}
                 className="hover:text-white hover:no-underline"
                 onClick={() => {}}
               >
@@ -63,7 +112,7 @@ const Navbar = () => {
               </Button>
             )}
           </div>
-          <p className="sm:hidden">...Search</p>
+          <SearchBar customClass="sm:hidden" />
         </Toolbar>
       </AppBar>
       <div>
@@ -72,10 +121,10 @@ const Navbar = () => {
             variant="temporary"
             anchor="right"
             open={mobileOpen}
-            onClose={()=> setMobileOpen((isOpen)=> !isOpen)}
+            onClose={() => setMobileOpen((isOpen) => !isOpen)}
             className="sm:!hidden drawerBackground"
-            ModalProps={{keepMounted: true}}
-            classes={{paper: 'drawerPaper w-60'}}
+            ModalProps={{ keepMounted: true }}
+            classes={{ paper: "drawerPaper w-60" }}
           >
             <Sidebar setMobileOpen={true} />
           </Drawer>
@@ -85,7 +134,7 @@ const Navbar = () => {
             anchor="left"
             open
             className="max-sm:!hidden"
-            classes={{paper: 'drawerPaper w-60'}}
+            classes={{ paper: "drawerPaper w-60" }}
           >
             <Sidebar setMobileOpen={true} />
           </Drawer>
