@@ -7,6 +7,7 @@ import MovieInformation from "./components/MovieInformation/MovieInformation";
 import Navbar from "./components/Navbar/Navbar";
 import Actors from "./components/Actors/Actors";
 import Profile from "./components/Profile/Profile";
+// import Profile from "./components/Profile/Profile";
 // import { Actors, MovieInformation, Movies, Profile } from "./components";
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
         <CssBaseline />
         <Navbar />
         <main className="grow mt-[70px]">
-        <div className="p-8">
+        <div className="p-8 dark:!bg-[#121212]">
         <Routes>
           <Route exact path="/" element={<Movies />} />
           <Route exact path="/approved" element={<Movies />} />
