@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { useGetMovieQuery, useGetRecommendationQuery } from "../../services/TMDB";
+import { useGetListQuery, useGetMovieQuery, useGetRecommendationQuery } from "../../services/TMDB";
 import { Box, Button, ButtonGroup, CircularProgress, Grid, Modal, Rating, Typography } from "@mui/material";
 import { selectGenreOrCategory } from "../../features/currentGenreOrCategory";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +16,7 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import MovieList from "../MovieList/MovieList";
+import axios from "axios";
  
 
 const apiKey = import.meta.env.VITE_TMDB_KEY
@@ -27,7 +28,18 @@ const MovieInformation = () => {
   const { id } = useParams();
 
   const { data, error, isFetching } = useGetMovieQuery(id);
-  
+  const { data: favoriteMovies } = useGetListQuery({
+    listName: "favorite/movies",
+    accountId: user.id,
+    sessionId: localStorage.getItem("session_id"),
+    page: 1,
+  });
+  const { data: watchlistMovies } = useGetListQuery({
+    listName: "watchlist/movies",
+    accountId: user.id,
+    sessionId: localStorage.getItem("session_id"),
+    page: 1,
+  });
   const { data: recommendations , isFetching: isRecommendationFetching } = useGetRecommendationQuery({
     list: "recommendations",
     movie_id: id,
@@ -37,6 +49,17 @@ const MovieInformation = () => {
   const [open, setOpen] = useState(false);
   const [isMovieFavorited, setIsMovieFavorited] = useState(false);
   const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
+
+  useEffect(() => {
+    setIsMovieFavorited(
+      !!favoriteMovies?.results?.find((movie) => movie?.id === data?.id)
+    );
+  }, [favoriteMovies, data]);
+  useEffect(() => {
+    setIsMovieWatchlisted(
+      !!watchlistMovies?.results?.find((movie) => movie?.id === data?.id)
+    );
+  }, [watchlistMovies, data]);
 
   const addToFavorites = async () => {
     await axios.post(
@@ -93,26 +116,26 @@ const MovieInformation = () => {
     >
       <Grid size={{ sm: 12, lg: 4 }}>
         <img
-          className="rounded-2xl shadow-2xl max-sm:w-full max-md:w-1/2 w-4/5 max-sm:my-0 max-sm:mx-auto max-md:h-[350px] max-sm:mb-8"
+          className="rounded-2xl dark:shadow-[#ffffff68] shadow-xl max-sm:w-full max-md:w-1/2 w-4/5 max-sm:my-0 max-sm:mx-auto max-md:h-[350px] max-sm:mb-8"
           src={`https://image.tmdb.org/t/p/w500/${data?.poster_path}`}
           alt={data?.title}
         />
       </Grid>
       <Grid container direction="column" size={{ lg: 7 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography className="dark:text-white" variant="h3" align="center" gutterBottom>
           {data?.title} ({data.release_date.split("-")[0]})
         </Typography>
-        <Typography variant="h5" align="center" gutterBottom>
+        <Typography className="dark:text-white" variant="h5" align="center" gutterBottom>
           {data?.tagline}
         </Typography>
         <Grid className="flex justify-around my-2.5 mx-0 max-sm:flex-col max-sm:flex-wrap">
           <Box display="flex" align="center">
             <Rating readOnly value={data.vote_average / 2} />
-            <Typography variant="subtitle1" gutterBottom className="!ml-5">
+            <Typography className="dark:text-white !ml-5" variant="subtitle1" gutterBottom>
               {data.vote_average} / 10
             </Typography>
           </Box>
-          <Typography variant="h6" align="center" gutterBottom>
+          <Typography className="dark:text-white" variant="h6" align="center" gutterBottom>
             {data.runtime}min{" "}
             {data?.spoken_languages.length > 0
               ? `/ ${data?.spoken_languages[0].name}`
@@ -122,7 +145,7 @@ const MovieInformation = () => {
         <Grid className="my-2.5 mx-0 flex justify-around flex-wrap">
           {data?.genres?.map((genre) => (
             <Link
-              className="flex justify-center items-center max-sm:py-2 max-sm:px-4"
+              className="dark:text-white flex justify-center items-center max-sm:py-2 max-sm:px-4"
               key={genre.name}
               to="/"
               onClick={() => dispatch(selectGenreOrCategory(genre.id))}
@@ -132,19 +155,19 @@ const MovieInformation = () => {
                 className="dark:invert-100 mr-2.5 h-[30px]"
                 // height={30}
               />
-              <Typography color="textPrimary" variant="subtitle1">
+              <Typography className="dark:!text-white" color="textPrimary" variant="subtitle1">
                 {genre?.name}
               </Typography>
             </Link>
           ))}
         </Grid>
-        <Typography variant="h5" gutterBottom style={{ marginTop: "20px" }}>
+        <Typography className="dark:text-white" variant="h5" gutterBottom style={{ marginTop: "20px" }}>
           Overview
         </Typography>
-        <Typography style={{ marginBottom: "2rem" }}>
+        <Typography className="dark:text-white" style={{ marginBottom: "2rem" }}>
           {data?.overview}
         </Typography>
-        <Typography variant="h5" gutterBottom>
+        <Typography className="dark:text-white" variant="h5" gutterBottom>
           Top Cast
         </Typography>
         <Grid container spacing={2}>
@@ -168,10 +191,10 @@ const MovieInformation = () => {
                         src={`https://image.tmdb.org/t/p/w500/${character.profile_path}`}
                         alt={character.name}
                       />
-                      <Typography color="textPrimary" align="center">
+                      <Typography className="dark:!text-white" color="textPrimary" align="center">
                         {character?.name}
                       </Typography>
-                      <Typography color="textSecondary" align="center">
+                      <Typography className="dark:!text-[#ffffffb3]" color="textSecondary" align="center">
                         {character.character.split("/")[0]}
                       </Typography>
                     </Grid>
@@ -205,9 +228,14 @@ const MovieInformation = () => {
                   IMDB
                 </Button>
                 <Button
-                  onClick={() => setOpen(true)}
+                  onClick={() => {
+    if (data?.videos?.results?.length > 0) {
+      setOpen(true);
+    }
+  }}
                   href="#"
                   endIcon={<Theaters />}
+                  disabled={data?.videos?.results?.length === 0}
                 >
                   Trailer
                 </Button>
@@ -235,7 +263,7 @@ const MovieInformation = () => {
                   endIcon={<ArrowBack />}
                   sx={{ borderColor: "primary.main" }}
                 >
-                  <Typography
+                  <Typography className="dark:text-white"
                     variant="subtitle2"
                     component={Link}
                     to="/"
@@ -251,15 +279,15 @@ const MovieInformation = () => {
         </Grid>
       </Grid>
        <Box marginTop="5rem" width="100%">
-        <Typography variant="h3" gutterBottom align="center">
+        <Typography className="dark:text-white" variant="h3" gutterBottom align="center">
           You might also like
         </Typography>
         {recommendations
           ? <MovieList movies={recommendations} numberOfMovies={12} />
-          : <Box>Sorry, nothing was found.</Box>}
+          : <Box className="dark:text-white">Sorry, nothing was found.</Box>}
       </Box>
       
-      <Modal
+      {/* <Modal
         closeAfterTransition
         // className={classes.modal}
         className="flex items-center justify-center"
@@ -277,7 +305,41 @@ const MovieInformation = () => {
             allow="autoplay"
           />
         )}
-      </Modal>
+      </Modal> */}
+
+      {/* <Modal
+  closeAfterTransition
+  className="flex items-center justify-center"
+  open={open}
+  onClose={() => setOpen(false)}
+>
+  {data?.videos?.results?.length > 0 && (
+    <iframe
+      autoPlay
+      className="w-[90%] sm:w-1/2 aspect-video"
+      title="Trailer"
+      src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
+      allow="autoplay"
+    />
+  )}
+</Modal> */}
+
+{data?.videos?.results?.length !== 0 && (
+  <Modal
+    closeAfterTransition
+    className="flex items-center justify-center"
+    open={open}
+    onClose={() => setOpen(false)}
+  >
+    <iframe
+      autoPlay
+      className="w-[90%] sm:w-1/2 aspect-video"
+      title="Trailer"
+      src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
+      allow="autoplay"
+    />
+  </Modal>
+)}
     </Grid>
   );
 };
