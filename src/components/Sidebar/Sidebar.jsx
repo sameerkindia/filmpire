@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import RedLogo from "./../../assets/red-logo.png";
@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useGetGenresQuery } from "../../services/TMDB";
 
-import generIcons from '../../assets/genres'
+import generIcons from "../../assets/genres";
 import { useDispatch, useSelector } from "react-redux";
 import { selectGenreOrCategory } from "../../features/currentGenreOrCategory";
 
@@ -28,15 +28,19 @@ const categories = [
   { label: "Upcoming", value: "upcoming" },
 ];
 
-
 const Sidebar = ({ setMobileOpen }) => {
   const { theme } = useContext(ThemeContext);
   const { data, isFetching } = useGetGenresQuery();
-  const { genreIdOrCategoryName } = useSelector((state) => state.currentGenreOrCategory)
- 
+  const { genreIdOrCategoryName } = useSelector(
+    (state) => state.currentGenreOrCategory
+  );
+
   const dispatch = useDispatch();
 
-  // console.log(data);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [genreIdOrCategoryName]);
+
   return (
     <>
       <Link
@@ -49,23 +53,28 @@ const Sidebar = ({ setMobileOpen }) => {
           alt="Filmpire logo"
         />
       </Link>
-      <Divider />
+      <Divider className="dark:!border-white" />
       <List>
-        <ListSubheader>Categories</ListSubheader>
+        <ListSubheader className="dark:!bg-[#121212] dark:!text-white">Categories</ListSubheader>
         {categories.map(({ label, value }) => (
           <Link key={value} className="links" to="/">
             <ListItem onClick={() => dispatch(selectGenreOrCategory(value))}>
               <ListItemIcon>
-                <img src={generIcons[label.toLowerCase()]} className="dark:invert-100" height={30} width={30} />
+                <img
+                  src={generIcons[label.toLowerCase()]}
+                  className="dark:invert-100"
+                  height={30}
+                  width={30}
+                />
               </ListItemIcon>
-              <ListItemText primary={label} />
+              <ListItemText className="dark:!text-white" primary={label} />
             </ListItem>
           </Link>
         ))}
       </List>
-      <Divider />
+      <Divider className="dark:!border-white" />
       <List>
-        <ListSubheader>Genres</ListSubheader>
+        <ListSubheader className="dark:!bg-[#121212] dark:!text-white">Genres</ListSubheader>
         {isFetching ? (
           <Box display="flex" justifyContent="center">
             <CircularProgress size="4rem" />
@@ -75,9 +84,14 @@ const Sidebar = ({ setMobileOpen }) => {
             <Link key={id} className="links" to="/">
               <ListItem onClick={() => dispatch(selectGenreOrCategory(id))}>
                 <ListItemIcon>
-                <img src={generIcons[name.toLowerCase()]} className="dark:invert-100" height={30} width={30} />
-              </ListItemIcon>
-                <ListItemText primary={name} />
+                  <img
+                    src={generIcons[name.toLowerCase()]}
+                    className="dark:invert-100"
+                    height={30}
+                    width={30}
+                  />
+                </ListItemIcon>
+                <ListItemText className="dark:!text-white" primary={name} />
               </ListItem>
             </Link>
           ))
