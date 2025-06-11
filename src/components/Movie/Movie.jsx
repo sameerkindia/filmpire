@@ -27,7 +27,7 @@ const Movie = ({ movie, i }) => {
       </Grow>
       <Typography
         variant="h5"
-        className="text-primary truncate w-[230px] mt-2.5 mb-0 text-center"
+        className="text-primary truncate w-[230px] mt-2.5 mb-0 text-center dark:!text-white"
       >
         {movie.title}
       </Typography>
