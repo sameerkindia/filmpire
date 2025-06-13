@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 
 const Movie = ({ movie, i }) => {
   return (
-    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }} className="p-2.5 justify-items-center">
+    <Grid
+      size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+      className="p-2.5 justify-items-center"
+    >
       <Grow in key={i} timeout={(i + 1) * 250}>
         <Link
           className="links items-center font-bold sm:flex flex-col hover:cursor-pointer"
