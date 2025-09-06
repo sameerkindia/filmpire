@@ -42,6 +42,7 @@ import { Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 
 import Navbar from "./components/Navbar/Navbar";
+import VpnOverlay from "./components/VPNOverlay/VPNOverlay";
 
 // Lazy loaded components
 const Movies = lazy(() => import("./components/Movies/Movies"));
@@ -55,6 +56,7 @@ function App() {
       <div className="flex h-full">
         <CssBaseline />
         <Navbar />
+        <VpnOverlay />
         <main className="grow mt-[70px]">
           <div className="p-8 dark:!bg-[#121212]">
             {/* Suspense handles fallback UI while components load */}

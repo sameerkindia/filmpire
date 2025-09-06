@@ -16,7 +16,7 @@ const Movie = ({ movie, i }) => {
           {movie.poster_path ? (
             <img
               alt={movie.title}
-              className="image rounded-[20px] h-[300px] mb-2.5 hover:scale-105"
+              className="image rounded-[20px] h-[300px] mb-2.5 hover:scale-105 max-sm:mx-auto"
               src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
             />
           ) : (
